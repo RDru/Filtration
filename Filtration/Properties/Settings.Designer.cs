@@ -12,7 +12,7 @@ namespace Filtration.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "14.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.Editors.SettingsDesigner.SettingsSingleFileGenerator", "15.9.0.0")]
     internal sealed partial class Settings : global::System.Configuration.ApplicationSettingsBase {
         
         private static Settings defaultInstance = ((Settings)(global::System.Configuration.ApplicationSettingsBase.Synchronized(new Settings())));
@@ -49,76 +49,121 @@ namespace Filtration.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int SuppressUpdatesUpToVersionMajorPart {
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool DownloadPrereleaseUpdates {
             get {
-                return ((int)(this["SuppressUpdatesUpToVersionMajorPart"]));
+                return ((bool)(this["DownloadPrereleaseUpdates"]));
             }
             set {
-                this["SuppressUpdatesUpToVersionMajorPart"] = value;
+                this["DownloadPrereleaseUpdates"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowSectionBrowser {
+            get {
+                return ((bool)(this["ShowSectionBrowser"]));
+            }
+            set {
+                this["ShowSectionBrowser"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowBlockGroupBrowser {
+            get {
+                return ((bool)(this["ShowBlockGroupBrowser"]));
+            }
+            set {
+                this["ShowBlockGroupBrowser"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowBlockOutputPreview {
+            get {
+                return ((bool)(this["ShowBlockOutputPreview"]));
+            }
+            set {
+                this["ShowBlockOutputPreview"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
-        public bool SuppressUpdates {
+        public bool ShowAdvanced {
             get {
-                return ((bool)(this["SuppressUpdates"]));
+                return ((bool)(this["ShowAdvanced"]));
             }
             set {
-                this["SuppressUpdates"] = value;
+                this["ShowAdvanced"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0")]
-        public int SuppressUpdatesUpToVersionMinorPart {
+        [global::System.Configuration.DefaultSettingValueAttribute("Normal")]
+        public global::System.Windows.WindowState WindowState {
             get {
-                return ((int)(this["SuppressUpdatesUpToVersionMinorPart"]));
+                return ((global::System.Windows.WindowState)(this["WindowState"]));
             }
             set {
-                this["SuppressUpdatesUpToVersionMinorPart"] = value;
+                this["WindowState"] = value;
             }
         }
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("2016-01-01")]
-        public global::System.DateTime StaticDataLastUpdated {
+        [global::System.Configuration.DefaultSettingValueAttribute("1200")]
+        public int WindowWidth {
             get {
-                return ((global::System.DateTime)(this["StaticDataLastUpdated"]));
+                return ((int)(this["WindowWidth"]));
             }
             set {
-                this["StaticDataLastUpdated"] = value;
+                this["WindowWidth"] = value;
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://ben-wallis.github.io/Filtration/ItemBaseTypes.txt")]
-        public string ItemBaseTypesStaticDataUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute("800")]
+        public int WindowHeight {
             get {
-                return ((string)(this["ItemBaseTypesStaticDataUrl"]));
+                return ((int)(this["WindowHeight"]));
+            }
+            set {
+                this["WindowHeight"] = value;
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://ben-wallis.github.io/Filtration/ItemClasses.txt")]
-        public string ItemClassesStaticDataUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string LastOpenScripts {
             get {
-                return ((string)(this["ItemClassesStaticDataUrl"]));
+                return ((string)(this["LastOpenScripts"]));
+            }
+            set {
+                this["LastOpenScripts"] = value;
             }
         }
         
-        [global::System.Configuration.ApplicationScopedSettingAttribute()]
+        [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("http://ben-wallis.github.io/Filtration/filtration_version.xml")]
-        public string UpdateDataUrl {
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool BlocksExpandedOnOpen {
             get {
-                return ((string)(this["UpdateDataUrl"]));
+                return ((bool)(this["BlocksExpandedOnOpen"]));
+            }
+            set {
+                this["BlocksExpandedOnOpen"] = value;
             }
         }
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using Filtration.Common.Services;
@@ -12,7 +13,7 @@ namespace Filtration.ThemeEditor.Services
 {
     public interface IThemeService
     {
-        void ApplyThemeToScript(Theme theme, ItemFilterScript script);
+        void ApplyThemeToScript(Theme theme, IItemFilterScript script);
     }
 
     public class ThemeService : IThemeService
@@ -24,43 +25,30 @@ namespace Filtration.ThemeEditor.Services
             _messageBoxService = messageBoxService;
         }
 
-        public void ApplyThemeToScript(Theme theme, ItemFilterScript script)
+        public void ApplyThemeToScript(Theme theme, IItemFilterScript script)
         {
             var mismatchedComponents = false;
             foreach (var component in theme.Components)
             {
-                var componentMatched = false;
-                Type targetType = null;
+                var blocks = script.ItemFilterBlocks.OfType<ItemFilterBlock>();
                 switch (component.ComponentType)
                 {
                     case ThemeComponentType.BackgroundColor:
-                        targetType = typeof (BackgroundColorBlockItem);
+                        mismatchedComponents = ApplyColorTheme(blocks, typeof(BackgroundColorBlockItem), component);
                         break;
                     case ThemeComponentType.TextColor:
-                        targetType = typeof (TextColorBlockItem);
+                        mismatchedComponents = ApplyColorTheme(blocks, typeof(TextColorBlockItem), component);
                         break;
                     case ThemeComponentType.BorderColor:
-                        targetType = typeof (BorderColorBlockItem);
+                        mismatchedComponents = ApplyColorTheme(blocks, typeof(BorderColorBlockItem), component);
                         break;
-                }
-
-                foreach (var block in script.ItemFilterBlocks)
-                {
-                    foreach (var blockItem in block.BlockItems.Where(i => i.GetType() == targetType))
-                    {
-                        var colorBlockItem = (ColorBlockItem) blockItem;
-                        if (colorBlockItem.ThemeComponent != null &&
-                            colorBlockItem.ThemeComponent.ComponentName == component.ComponentName)
-                        {
-                            colorBlockItem.Color = component.Color;
-                            componentMatched = true;
-                        }
-                    }   
-                }
-
-                if (!componentMatched)
-                {
-                    mismatchedComponents = true;
+                    case ThemeComponentType.FontSize:
+                        mismatchedComponents = ApplyIntegerTheme(blocks, typeof(FontSizeBlockItem), component);
+                        break;
+                    case ThemeComponentType.AlertSound:
+                        mismatchedComponents = ApplyStrIntTheme(blocks, typeof(SoundBlockItem), component);
+                        mismatchedComponents = ApplyStrIntTheme(blocks, typeof(PositionalSoundBlockItem), component);
+                        break;
                 }
             }
 
@@ -70,6 +58,67 @@ namespace Filtration.ThemeEditor.Services
                     "Not all theme components had matches - are you sure this theme is designed for this script?",
                     MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
+        }
+
+        private bool ApplyColorTheme(IEnumerable<ItemFilterBlock> blocks, Type type, ThemeComponent component)
+        {
+            var componentMatched = false;
+            foreach (var block in blocks)
+            {
+                foreach (var blockItem in block.BlockItems.Where(i => i.GetType() == type))
+                {
+                    var colorBlockItem = (ColorBlockItem)blockItem;
+                    if (colorBlockItem.ThemeComponent != null &&
+                        colorBlockItem.ThemeComponent.ComponentName == component.ComponentName)
+                    {
+                        colorBlockItem.Color = ((ColorThemeComponent)component).Color;
+                        componentMatched = true;
+                    }
+                }
+            }
+
+            return !componentMatched;
+        }
+
+        private bool ApplyIntegerTheme(IEnumerable<ItemFilterBlock> blocks, Type type, ThemeComponent component)
+        {
+            var componentMatched = false;
+            foreach (var block in blocks)
+            {
+                foreach (var blockItem in block.BlockItems.Where(i => i.GetType() == type))
+                {
+                    var colorBlockItem = (IntegerBlockItem)blockItem;
+                    if (colorBlockItem.ThemeComponent != null &&
+                        colorBlockItem.ThemeComponent.ComponentName == component.ComponentName)
+                    {
+                        colorBlockItem.Value = ((IntegerThemeComponent)component).Value;
+                        componentMatched = true;
+                    }
+                }
+            }
+
+            return !componentMatched;
+        }
+
+        private bool ApplyStrIntTheme(IEnumerable<ItemFilterBlock> blocks, Type type, ThemeComponent component)
+        {
+            var componentMatched = false;
+            foreach (var block in blocks)
+            {
+                foreach (var blockItem in block.BlockItems.Where(i => i.GetType() == type))
+                {
+                    var colorBlockItem = (StrIntBlockItem)blockItem;
+                    if (colorBlockItem.ThemeComponent != null &&
+                        colorBlockItem.ThemeComponent.ComponentName == component.ComponentName)
+                    {
+                        colorBlockItem.Value = ((StrIntThemeComponent)component).Value;
+                        colorBlockItem.SecondValue = ((StrIntThemeComponent)component).SecondValue;
+                        componentMatched = true;
+                    }
+                }
+            }
+
+            return !componentMatched;
         }
     }
 }

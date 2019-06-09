@@ -2,22 +2,30 @@
         x:ClassModifier="internal"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:fluent="clr-namespace:Fluent;assembly=Fluent"
         xmlns:viewModels="clr-namespace:Filtration.ViewModels"
         xmlns:viewsAvalonDock="clr-namespace:Filtration.Views.AvalonDock"
         xmlns:views="clr-namespace:Filtration.Views"
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
-        mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance Type=viewModels:MainWindowViewModel}"
-        Title="{Binding WindowTitle}" Height="762" Width="1126" IsIconVisible="True"
+        xmlns:utility="clr-namespace:Filtration.Utility"
+        xmlns:designTime="clr-namespace:Filtration.ViewModels.DesignTime"
+        mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
+        d:DataContext="{d:DesignInstance Type=designTime:DesignTimeMainWindowViewModel, IsDesignTimeCreatable=True}"
+        Title="{Binding WindowTitle}" Height="{Binding WindowHeight, Mode=TwoWay}" Width="{Binding WindowWidth, Mode=TwoWay}" IsIconVisible="True" WindowState="{Binding WindowState}"
         Closing="MainWindow_OnClosing" Drop="MainWindow_OnDrop" AllowDrop="True">
+
     <fluent:RibbonWindow.InputBindings>
         <KeyBinding Command="{Binding SaveCommand}" Modifiers="Control" Key="S" />
         <KeyBinding Command="{Binding OpenScriptCommand}" Modifiers="Control" Key="O" />
         <KeyBinding Command="{Binding NewScriptCommand}" Modifiers="Control" Key="N" />
+        <KeyBinding Command="{Binding UndoCommand}" Modifiers="Control" Key="Z" />
+        <KeyBinding Command="{Binding RedoCommand}" Modifiers="Control" Key="Y" />
     </fluent:RibbonWindow.InputBindings>
+    <utility:RoutedCommandHandlers.Commands>
+        <utility:RoutedCommandHandler RoutedCommand="{StaticResource OpenScriptRoutedCommand}" Command="{Binding OpenScriptCommand}" />
+    </utility:RoutedCommandHandlers.Commands>
     <DockPanel x:Name="RootDockPanel">
         <fluent:Ribbon DockPanel.Dock="Top" x:Name="RibbonRoot" IsEnabled="{Binding ShowLoadingBanner, Converter={StaticResource BoolInverterConverter}}">
             <fluent:Ribbon.Menu>
@@ -27,7 +35,7 @@
                             <fluent:BackstageTabItem.ContentTemplate>
                                 <DataTemplate>
                                     <StackPanel>
-                                    <TextBlock Margin="20">Recent Documents will go here in a future release.</TextBlock>
+                                        <TextBlock Margin="20">Recent Documents will go here in a future release.</TextBlock>
                                     </StackPanel>
                                 </DataTemplate>
                             </fluent:BackstageTabItem.ContentTemplate>
@@ -56,18 +64,18 @@
                                                  Background="ForestGreen"
                                                  BorderBrush="ForestGreen"
                                                  x:Name="ScriptToolsGroup"
-                                                 IsVisibleChanged="ScriptToolsGroup_OnIsVisibleChanged"  
+                                                 IsVisibleChanged="ScriptToolsGroup_OnIsVisibleChanged"
                                                  Visibility="{Binding ActiveDocumentIsScript, Converter={StaticResource BooleanVisibilityConverter}, Mode=OneWay}" />
                 <fluent:RibbonContextualTabGroup Header="Theme"
                                                  Background="DodgerBlue"
                                                  BorderBrush="DodgerBlue"
-                                                 x:Name="ThemeToolsGroup" 
+                                                 x:Name="ThemeToolsGroup"
                                                  IsVisibleChanged="ThemeToolsGroup_OnIsVisibleChanged"
                                                  Visibility="{Binding ActiveDocumentIsTheme, Converter={StaticResource BooleanVisibilityConverter}, Mode=OneWay}" />
             </fluent:Ribbon.ContextualGroups>
             <fluent:RibbonTabItem Header="View">
                 <fluent:RibbonGroupBox Header="Tools">
-                    <fluent:ToggleButton Header="Section Browser" Width="150" Size="Middle" Icon="{StaticResource AddSectionIcon}" IsChecked="{Binding AvalonDockWorkspaceViewModel.SectionBrowserViewModel.IsVisible}"/>
+                    <fluent:ToggleButton Header="Section Browser" Width="150" Size="Middle" Icon="{StaticResource AddSectionIcon}" IsChecked="{Binding AvalonDockWorkspaceViewModel.CommentBlockBrowserViewModel.IsVisible}"/>
                     <fluent:ToggleButton Header="Block Group Browser" SizeDefinition="Middle" Icon="{StaticResource BlockGroupBrowserIcon}" IsChecked="{Binding AvalonDockWorkspaceViewModel.BlockGroupBrowserViewModel.IsVisible}" />
                     <fluent:ToggleButton Header="Block Output Preview" SizeDefinition="Middle" Icon="{StaticResource BlockOutputPreviewIcon}" IsChecked="{Binding AvalonDockWorkspaceViewModel.BlockOutputPreviewViewModel.IsVisible}" />
                 </fluent:RibbonGroupBox>
@@ -80,6 +88,10 @@
                     <fluent:Button Header="Paste Style" Command="{Binding PasteBlockStyleCommand}" Icon="{StaticResource PasteStyleIcon}" LargeIcon="{StaticResource PasteIcon}" SizeDefinition="Middle" ToolTip="Paste Style (Ctrl+Shift+V)" />
                     <fluent:Button Header="Copy Script" Command="{Binding CopyScriptCommand}" Icon="{StaticResource CopyIcon}" LargeIcon="{StaticResource PasteIcon}" SizeDefinition="Middle" />
                 </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Undo">
+                    <fluent:Button Header="Undo" Command="{Binding UndoCommand}"  ToolTip="Undo" SizeDefinition="Middle" Icon="{StaticResource UndoIcon}" />
+                    <fluent:Button Header="Redo" Command="{Binding RedoCommand}" ToolTip="Redo" SizeDefinition="Middle" Icon="{StaticResource RedoIcon}" />
+                </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Blocks">
                     <fluent:Button Header="Add Block" Command="{Binding AddBlockCommand}" SizeDefinition="Middle" Icon="{StaticResource AddBlockIcon}" />
                     <fluent:Button Header="Add Section" Command="{Binding AddSectionCommand}" SizeDefinition="Middle" Icon="{StaticResource AddSectionIcon}" />
@@ -91,13 +103,21 @@
                     <fluent:Button Header="Enable Block" Command="{Binding EnableBlockCommand}"  SizeDefinition="Middle" Icon="{StaticResource StandbyEnabledIcon}" />
                     <fluent:Button Header="Disable Block" Command="{Binding DisableBlockCommand}"  SizeDefinition="Middle" Icon="{StaticResource StandbyDisabledIcon}" />
                 </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Sections">
+                    <fluent:Button Header="Enable Section" Command="{Binding EnableSectionCommand}"  SizeDefinition="Middle" Icon="{StaticResource StandbyEnabledIcon}" />
+                    <fluent:Button Header="Disable Section" Command="{Binding DisableSectionCommand}"  SizeDefinition="Middle" Icon="{StaticResource StandbyDisabledIcon}" />
+                    <fluent:Button Header=""  SizeDefinition="Middle" IsEnabled="False" />
+                    <fluent:Button Header="Expand All Sections" Command="{Binding ExpandAllSectionsCommand}" SizeDefinition="Middle" Icon="{StaticResource ExpandIcon}" />
+                    <fluent:Button Header="Collapse All Sections" Command="{Binding CollapseAllSectionsCommand}" SizeDefinition="Middle" Icon="{StaticResource CollapseIcon}" />
+                </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Expand / Collapse">
                     <fluent:Button Header="Expand All" Command="{Binding ExpandAllBlocksCommand}" SizeDefinition="Middle" Icon="{StaticResource ExpandIcon}" />
                     <fluent:Button Header="Collapse All" Command="{Binding CollapseAllBlocksCommand}" SizeDefinition="Middle" Icon="{StaticResource CollapseIcon}" />
                 </fluent:RibbonGroupBox>
-                <fluent:RibbonGroupBox Header="Filters">
+                <fluent:RibbonGroupBox Header="Filters &amp; Styles">
                     <fluent:ToggleButton Command="{Binding ToggleShowAdvancedCommand}" CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Self}}" Header="Show Advanced Blocks" SizeDefinition="Middle" Icon="{StaticResource ShowAdvancedIcon}" IsChecked="{Binding ShowAdvancedStatus, Mode=OneWay}" />
                     <fluent:Button Header="Clear All Filters" Command="{Binding ClearFiltersCommand}" SizeDefinition="Middle" Icon="{StaticResource ClearFilterIcon}" />
+                    <fluent:Button Header="Clear Styles" Command="{Binding ClearStylesCommand}" SizeDefinition="Middle" Icon="{StaticResource PasteStyleIcon}" />
                 </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Themes">
                     <fluent:Button Header="Edit Master Theme" Command="{Binding EditMasterThemeCommand}" Icon="{StaticResource ThemeIcon}" LargeIcon="{StaticResource ThemeIcon}" />
@@ -105,12 +125,21 @@
                     <fluent:Button Header="Create Theme" Command="{Binding CreateThemeCommand}" Icon="{StaticResource ThemeIcon}" LargeIcon="{StaticResource ThemeIcon}" />
                     <fluent:Button Header="Replace Colours" Command="{Binding ReplaceColorsCommand}" Icon="{StaticResource ReplaceColorsIcon}" LargeIcon="{StaticResource ReplaceColorsIcon}" />
                 </fluent:RibbonGroupBox>
+                <fluent:RibbonGroupBox Header="Helpers">
+                    <fluent:Button Header="Enable Drop Sounds" Command="{Binding EnableDropSoundsCommand}" SizeDefinition="Middle" Icon="{StaticResource EnableDropSoundsIcon}" LargeIcon="{StaticResource EnableDropSoundsIcon}" />
+                    <fluent:Button Header="Disable Drop Sounds" Command="{Binding DisableDropSoundsCommand}" SizeDefinition="Middle" Icon="{StaticResource DisableDropSoundsIcon}" LargeIcon="{StaticResource DisableDropSoundsIcon}" />
+                </fluent:RibbonGroupBox>
             </fluent:RibbonTabItem>
             <fluent:RibbonTabItem x:Name="ThemeToolsTabItem" Header="Theme Tools" Group="{Binding ElementName=ThemeToolsGroup}" Visibility="{Binding ActiveDocumentIsTheme, Converter={StaticResource BooleanVisibilityConverter}, Mode=OneWay}">
                 <fluent:RibbonGroupBox Header="Add Components">
                     <fluent:Button SizeDefinition="Middle" Header="Add Text Color" Icon="{StaticResource AddIcon}" Command="{Binding AddTextColorThemeComponentCommand}" />
                     <fluent:Button SizeDefinition="Middle" Header="Add Background Color" Icon="{StaticResource AddIcon}" Command="{Binding AddBackgroundColorThemeComponentCommand}" />
                     <fluent:Button SizeDefinition="Middle" Header="Add Border Color" Icon="{StaticResource AddIcon}" Command="{Binding AddBorderColorThemeComponentCommand}" />
+                    <fluent:Button SizeDefinition="Middle" Header="Add Font Size" Icon="{StaticResource AddIcon}" Command="{Binding AddFontSizeThemeComponentCommand}" />
+                    <fluent:Button SizeDefinition="Middle" Header="Add Alert Sound" Icon="{StaticResource AddIcon}" Command="{Binding AddAlertSoundThemeComponentCommand}" />
+                    <fluent:Button SizeDefinition="Middle" Header="Add Custom Sound" Icon="{StaticResource AddIcon}" Command="{Binding AddCustomSoundThemeComponentCommand}" />
+                    <fluent:Button SizeDefinition="Middle" Header="Add Icon" Icon="{StaticResource AddIcon}" Command="{Binding AddIconThemeComponentCommand}" />
+                    <fluent:Button SizeDefinition="Middle" Header="Add Effect Color" Icon="{StaticResource AddIcon}" Command="{Binding AddEffectColorThemeComponentCommand}" />
                 </fluent:RibbonGroupBox>
                 <fluent:RibbonGroupBox Header="Delete">
                     <fluent:Button Header="Delete Theme Component" Icon="{StaticResource ThemeComponentDeleteIcon}" LargeIcon="{StaticResource ThemeComponentDeleteIcon}" Command="{Binding DeleteThemeComponentCommand}" />
@@ -143,7 +172,8 @@
                     </Border>
                 </Grid>
             </Grid>
+            <views:UpdateView DataContext="{Binding UpdateViewModel}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="4" Height="90" />
         </Grid>
     </DockPanel>
 </fluent:RibbonWindow>
- 
+

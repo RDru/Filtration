@@ -43,7 +43,7 @@
                     </viewsAvalonDock:PanesTemplateSelector.BlockGroupBrowserTemplate>
                     <viewsAvalonDock:PanesTemplateSelector.SectionBrowserTemplate>
                         <DataTemplate>
-                            <toolPanes:SectionBrowserView DataContext="{Binding}" />
+                            <toolPanes:CommentBlockBrowserView DataContext="{Binding}" />
                         </DataTemplate>
                     </viewsAvalonDock:PanesTemplateSelector.SectionBrowserTemplate>
                     <viewsAvalonDock:PanesTemplateSelector.BlockOutputPreviewTemplate>
@@ -61,6 +61,11 @@
                             <themeEditorViews:ThemeEditorView DataContext="{Binding}" />
                         </DataTemplate>
                     </viewsAvalonDock:PanesTemplateSelector.ThemeTemplate>
+                    <viewsAvalonDock:PanesTemplateSelector.UpdateTemplate>
+                        <DataTemplate>
+                            <views:UpdateTabView DataContext="{Binding}" />
+                        </DataTemplate>
+                    </viewsAvalonDock:PanesTemplateSelector.UpdateTemplate>
                 </viewsAvalonDock:PanesTemplateSelector>
             </xcad:DockingManager.LayoutItemTemplateSelector>
 
@@ -94,7 +99,7 @@
 
             <xcad:LayoutRoot>
                 <xcad:LayoutPanel Orientation="Horizontal">
-                    <xcad:LayoutAnchorablePane Name="SectionBrowserPane" DockWidth="150" />
+                    <xcad:LayoutAnchorablePane Name="SectionBrowserPane" DockWidth="200" />
                     <xcad:LayoutPanel Orientation="Vertical">
                         <xcad:LayoutDocumentPane />
                     </xcad:LayoutPanel>

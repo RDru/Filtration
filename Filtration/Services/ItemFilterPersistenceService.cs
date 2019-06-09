@@ -11,8 +11,8 @@ namespace Filtration.Services
     {
         void SetItemFilterScriptDirectory(string path);
         string ItemFilterScriptDirectory { get; }
-        Task<ItemFilterScript> LoadItemFilterScriptAsync(string filePath);
-        Task SaveItemFilterScriptAsync(ItemFilterScript script);
+        Task<IItemFilterScript> LoadItemFilterScriptAsync(string filePath);
+        Task SaveItemFilterScriptAsync(IItemFilterScript script);
         string DefaultPathOfExileDirectory();
     }
 
@@ -26,15 +26,7 @@ namespace Filtration.Services
             _fileSystemService = fileSystemService;
             _itemFilterScriptTranslator = itemFilterScriptTranslator;
 
-            if (string.IsNullOrEmpty(Settings.Default.DefaultFilterDirectory))
-            {
-                ItemFilterScriptDirectory = DefaultPathOfExileDirectory();
-                Settings.Default.DefaultFilterDirectory = ItemFilterScriptDirectory;
-            }
-            else
-            {
-                ItemFilterScriptDirectory = Settings.Default.DefaultFilterDirectory;
-            }
+           ItemFilterScriptDirectory = Settings.Default.DefaultFilterDirectory;
         }
 
         public string ItemFilterScriptDirectory { get; private set; }
@@ -57,11 +49,12 @@ namespace Filtration.Services
 
             ItemFilterScriptDirectory = path;
             Settings.Default.DefaultFilterDirectory = path;
+            Settings.Default.Save();
         }
 
-        public async Task<ItemFilterScript> LoadItemFilterScriptAsync(string filePath)
+        public async Task<IItemFilterScript> LoadItemFilterScriptAsync(string filePath)
         {
-            ItemFilterScript loadedScript = null;
+            IItemFilterScript loadedScript = null;
             await Task.Run(() =>
             {
                 loadedScript = _itemFilterScriptTranslator.TranslateStringToItemFilterScript(
@@ -72,11 +65,11 @@ namespace Filtration.Services
             {
                 loadedScript.FilePath = filePath;
             }
-        
+
             return loadedScript;
         }
 
-        public async Task SaveItemFilterScriptAsync(ItemFilterScript script)
+        public async Task SaveItemFilterScriptAsync(IItemFilterScript script)
         {
             await Task.Run(() =>
             {

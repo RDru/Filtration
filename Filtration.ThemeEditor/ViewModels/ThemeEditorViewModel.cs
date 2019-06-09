@@ -23,12 +23,11 @@ namespace Filtration.ThemeEditor.ViewModels
     {
         RelayCommand<ThemeComponentType> AddThemeComponentCommand { get; }
         RelayCommand<ThemeComponent> DeleteThemeComponentCommand { get; }
-        RelayCommand CloseCommand { get; }
 
         void InitialiseForNewTheme(ThemeComponentCollection themeComponentCollection);
-        void InitialiseForMasterTheme(ItemFilterScript script);
+        void InitialiseForMasterTheme(IItemFilterScript script);
         bool IsMasterTheme { get; }
-        ItemFilterScript IsMasterThemeForScript { get; }
+        IItemFilterScript IsMasterThemeForScript { get; }
         string Title { get; }
         string FilePath { get; set; }
         string Filename { get; }
@@ -72,7 +71,7 @@ namespace Filtration.ThemeEditor.ViewModels
 
         public bool IsMasterTheme => Components.IsMasterCollection;
 
-        public ItemFilterScript IsMasterThemeForScript { get; private set; }
+        public IItemFilterScript IsMasterThemeForScript { get; private set; }
 
         public void InitialiseForNewTheme(ThemeComponentCollection themeComponentCollection)
         {
@@ -80,7 +79,7 @@ namespace Filtration.ThemeEditor.ViewModels
             _filenameIsFake = true;
         }
 
-        public void InitialiseForMasterTheme(ItemFilterScript script)
+        public void InitialiseForMasterTheme(IItemFilterScript script)
         {
             Components = script.ThemeComponents;
             IsMasterThemeForScript = script;
@@ -186,16 +185,39 @@ namespace Filtration.ThemeEditor.ViewModels
         }
 
 #pragma warning disable 1998
-        public async Task Close()
+        public async Task<bool> Close()
 #pragma warning restore 1998
         {
            Messenger.Default.Send(new ThemeClosedMessage {ClosedViewModel = this});
+            return true;
         }
         
         private void OnAddThemeComponentCommand(ThemeComponentType themeComponentType)
         {
-            Components.Add(new ThemeComponent(themeComponentType, "Untitled Component",
-                new Color {A = 255, R = 255, G = 255, B = 255}));
+            switch (themeComponentType)
+            {
+                case ThemeComponentType.BackgroundColor:
+                case ThemeComponentType.BorderColor:
+                case ThemeComponentType.TextColor:
+                    Components.Add(new ColorThemeComponent(themeComponentType, "Untitled Component",
+                        new Color { A = 240, R = 255, G = 255, B = 255 }));
+                    break;
+                case ThemeComponentType.FontSize:
+                    Components.Add(new IntegerThemeComponent(themeComponentType, "Untitled Component", 35));
+                    break;
+                case ThemeComponentType.AlertSound:
+                    Components.Add(new StrIntThemeComponent(themeComponentType, "Untitled Component", "1", 100));
+                    break;
+                case ThemeComponentType.CustomSound:
+                    Components.Add(new StringThemeComponent(themeComponentType, "Untitled Component", ""));
+                    break;
+                case ThemeComponentType.Icon:
+                    Components.Add(new IconThemeComponent(themeComponentType, "Untitled Component", IconSize.Largest, IconColor.Red, IconShape.Circle));
+                    break;
+                case ThemeComponentType.Effect:
+                    Components.Add(new EffectColorThemeComponent(themeComponentType, "Untitled Component", EffectColor.Red, false));
+                    break;
+            }
         }
 
         private void OnDeleteThemeComponentCommand(ThemeComponent themeComponent)

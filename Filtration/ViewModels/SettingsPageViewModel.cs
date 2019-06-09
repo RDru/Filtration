@@ -1,8 +1,4 @@
-﻿using System.IO;
-using System.Windows;
-using Filtration.Common.Services;
-using Filtration.Common.ViewModels;
-using Filtration.Properties;
+﻿using Filtration.Properties;
 using Filtration.Services;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
@@ -11,43 +7,50 @@ namespace Filtration.ViewModels
 {
     internal interface ISettingsPageViewModel
     {
+        RelayCommand SetItemFilterScriptDirectoryCommand { get; }
+
+        string DefaultFilterDirectory { get; }
+        bool BlocksExpandedOnOpen { get; set; }
+        bool DownloadPrereleaseUpdates { get; set; }
+        bool ExtraLineBetweenBlocks { get; set; }
     }
 
     internal class SettingsPageViewModel : ViewModelBase, ISettingsPageViewModel
     {
-        private readonly IItemFilterPersistenceService _itemFilterPersistenceService;
-        private readonly IMessageBoxService _messageBoxService;
+        private readonly IItemFilterScriptDirectoryService _itemFilterScriptDirectoryService;
 
-        public SettingsPageViewModel(IItemFilterPersistenceService itemFilterPersistenceService, IMessageBoxService messageBoxService)
+        public SettingsPageViewModel(IItemFilterScriptDirectoryService itemFilterScriptDirectoryService)
         {
-            _itemFilterPersistenceService = itemFilterPersistenceService;
-            _messageBoxService = messageBoxService;
-            SaveCommand = new RelayCommand(OnSaveCommand);
-
-            DefaultFilterDirectory = Settings.Default.DefaultFilterDirectory;
-            ExtraLineBetweenBlocks = Settings.Default.ExtraLineBetweenBlocks;
-            SuppressUpdateNotifications = Settings.Default.SuppressUpdates;
+            _itemFilterScriptDirectoryService = itemFilterScriptDirectoryService;
+            SetItemFilterScriptDirectoryCommand = new RelayCommand(OnSetItemFilterScriptDirectoryCommand);
         }
-        public RelayCommand SaveCommand { get; private set; }
 
-        public string DefaultFilterDirectory { get; set; }
-        public bool ExtraLineBetweenBlocks { get; set; }
-        public bool SuppressUpdateNotifications { get; set; }
+        public RelayCommand SetItemFilterScriptDirectoryCommand { get; }
 
-        private void OnSaveCommand()
+        public string DefaultFilterDirectory => Settings.Default.DefaultFilterDirectory;
+
+        public bool BlocksExpandedOnOpen
         {
-            try
-            {
-                _itemFilterPersistenceService.SetItemFilterScriptDirectory(DefaultFilterDirectory);
+            get => Settings.Default.BlocksExpandedOnOpen;
+            set => Settings.Default.BlocksExpandedOnOpen = value;
+        }
 
-                Settings.Default.ExtraLineBetweenBlocks = ExtraLineBetweenBlocks;
-                Settings.Default.SuppressUpdates = SuppressUpdateNotifications;
-            }
-            catch (DirectoryNotFoundException)
-            {
-                _messageBoxService.Show("Error", "The entered Default Filter Directory is invalid or does not exist.",
-                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            }
+        public bool DownloadPrereleaseUpdates
+        {
+            get => Settings.Default.DownloadPrereleaseUpdates;
+            set => Settings.Default.DownloadPrereleaseUpdates = value;
+        }
+
+        public bool ExtraLineBetweenBlocks
+        {
+            get => Settings.Default.ExtraLineBetweenBlocks;
+            set => Settings.Default.ExtraLineBetweenBlocks = value;
+        }
+
+        private void OnSetItemFilterScriptDirectoryCommand()
+        {
+            _itemFilterScriptDirectoryService.SetItemFilterScriptDirectory();
+            RaisePropertyChanged(nameof(DefaultFilterDirectory));
         }
     }
 }

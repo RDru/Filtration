@@ -1,7 +1,8 @@
 ﻿using System.Threading.Tasks;
-using Filtration.ObjectModel;
+using Filtration.ObjectModel.Factories;
 using Filtration.Services;
 using Filtration.ViewModels;
+using Filtration.ViewModels.Factories;
 
 namespace Filtration.Repositories
 {
@@ -9,19 +10,20 @@ namespace Filtration.Repositories
     {
         Task<IItemFilterScriptViewModel> LoadScriptFromFileAsync(string path);
         IItemFilterScriptViewModel NewScript();
-        string GetItemFilterScriptDirectory();
-        void SetItemFilterScriptDirectory(string path);
     }
 
     internal class ItemFilterScriptRepository : IItemFilterScriptRepository
     {
         private readonly IItemFilterPersistenceService _itemFilterPersistenceService;
+        private readonly IItemFilterScriptFactory _itemFilterScriptFactory;
         private readonly IItemFilterScriptViewModelFactory _itemFilterScriptViewModelFactory;
 
         public ItemFilterScriptRepository(IItemFilterPersistenceService itemFilterPersistenceService,
+                                          IItemFilterScriptFactory itemFilterScriptFactory,
                                           IItemFilterScriptViewModelFactory itemFilterScriptViewModelFactory)
         {
             _itemFilterPersistenceService = itemFilterPersistenceService;
+            _itemFilterScriptFactory = itemFilterScriptFactory;
             _itemFilterScriptViewModelFactory = itemFilterScriptViewModelFactory;
         }
 
@@ -37,21 +39,12 @@ namespace Filtration.Repositories
 
         public IItemFilterScriptViewModel NewScript()
         {
-            var newScript = new ItemFilterScript();
+            var newScript = _itemFilterScriptFactory.Create();
             var newViewModel = _itemFilterScriptViewModelFactory.Create();
             newViewModel.Initialise(newScript, true);
 
             return newViewModel;
         }
-        
-        public void SetItemFilterScriptDirectory(string path)
-        {
-            _itemFilterPersistenceService.SetItemFilterScriptDirectory(path);
-        }
-
-        public string GetItemFilterScriptDirectory()
-        {
-            return _itemFilterPersistenceService.ItemFilterScriptDirectory;
-        }
     }
 }
+;

@@ -2,11 +2,11 @@
 using Castle.MicroKernel.SubSystems.Configuration;
 using Castle.Windsor;
 using Filtration.Services;
-using Filtration.Utilities;
+using Filtration.Utility;
 
 namespace Filtration.WindsorInstallers
 {
-    public class ServicesInstaller :IWindsorInstaller
+    public class ServicesInstaller : IWindsorInstaller
     {
         public void Install(IWindsorContainer container, IConfigurationStore store)
         {
@@ -16,13 +16,18 @@ namespace Filtration.WindsorInstallers
                     .LifeStyle.Singleton);
 
             container.Register(
-                Component.For<IStaticDataService>()
-                    .ImplementedBy<StaticDataService>()
-                    .LifeStyle.Singleton);
+                Component.For<IItemFilterScriptDirectoryService>()
+                         .ImplementedBy<ItemFilterScriptDirectoryService>()
+                         .LifeStyle.Singleton);
 
             container.Register(
-                Component.For<IBlockGroupMapper>()
-                    .ImplementedBy<BlockGroupMapper>()
+                Component.For<IScriptLoadingService>()
+                         .ImplementedBy<ScriptLoadingService>()
+                         .LifeStyle.Singleton);
+
+            container.Register(
+                Component.For<IStaticDataService>()
+                    .ImplementedBy<StaticDataService>()
                     .LifeStyle.Singleton);
 
             container.Register(
@@ -31,13 +36,33 @@ namespace Filtration.WindsorInstallers
                     .LifeStyle.Singleton);
 
             container.Register(
-                Component.For<IUpdateCheckService>()
-                    .ImplementedBy<UpdateCheckService>()
+                Component.For<IUpdateService>()
+                    .ImplementedBy<UpdateService>()
                     .LifeStyle.Singleton);
 
             container.Register(
                 Component.For<IClipboardService>()
                     .ImplementedBy<ClipboardService>()
+                    .LifeStyle.Singleton);
+
+            container.Register(
+                Component.For<IBootstrapper>()
+                    .ImplementedBy<Bootstrapper>()
+                    .LifeStyle.Singleton);
+
+            container.Register(
+                Component.For<ISettingsService>()
+                    .ImplementedBy<SettingsService>()
+                    .LifeStyle.Singleton);
+
+            container.Register(
+                Component.For<IDialogService>()
+                    .ImplementedBy<DialogService>()
+                    .LifeStyle.Singleton);
+
+            container.Register(
+                Component.For<ISplatNLogAdapter>()
+                    .ImplementedBy<SplatNLogAdapter>()
                     .LifeStyle.Singleton);
         }
     }

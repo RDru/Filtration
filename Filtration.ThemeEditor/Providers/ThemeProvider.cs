@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Filtration.ObjectModel;
+using Filtration.ObjectModel.Enums;
 using Filtration.ObjectModel.ThemeEditor;
 using Filtration.ThemeEditor.Services;
 using Filtration.ThemeEditor.ViewModels;
@@ -11,8 +12,8 @@ namespace Filtration.ThemeEditor.Providers
 {
     public interface IThemeProvider
     {
-        IThemeEditorViewModel NewThemeForScript(ItemFilterScript script);
-        IThemeEditorViewModel MasterThemeForScript(ItemFilterScript script);
+        IThemeEditorViewModel NewThemeForScript(IItemFilterScript script);
+        IThemeEditorViewModel MasterThemeForScript(IItemFilterScript script);
         Task<IThemeEditorViewModel> LoadThemeFromFile(string filePath);
         Task<Theme> LoadThemeModelFromFile(string filePath);
         Task SaveThemeAsync(IThemeEditorViewModel themeEditorViewModel, string filePath);
@@ -29,12 +30,25 @@ namespace Filtration.ThemeEditor.Providers
             _themePersistenceService = themePersistenceService;
         }
 
-        public IThemeEditorViewModel NewThemeForScript(ItemFilterScript script)
+        public IThemeEditorViewModel NewThemeForScript(IItemFilterScript script)
         {
             var themeComponentCollection = script.ThemeComponents.Aggregate(new ThemeComponentCollection(),
                 (c, component) =>
                 {
-                    c.Add(new ThemeComponent(component.ComponentType, component.ComponentName, component.Color));
+                    switch(component.ComponentType)
+                    {
+                        case ThemeComponentType.BackgroundColor:
+                        case ThemeComponentType.BorderColor:
+                        case ThemeComponentType.TextColor:
+                            c.Add(new ColorThemeComponent(component.ComponentType, component.ComponentName, ((ColorThemeComponent)component).Color));
+                            break;
+                        case ThemeComponentType.FontSize:
+                            c.Add(new IntegerThemeComponent(component.ComponentType, component.ComponentName, ((IntegerThemeComponent)component).Value));
+                            break;
+                        case ThemeComponentType.AlertSound:
+                            c.Add(new StrIntThemeComponent(component.ComponentType, component.ComponentName, ((StrIntThemeComponent)component).Value, ((StrIntThemeComponent)component).SecondValue));
+                            break;
+                    }
                     return c;
                 });
                 
@@ -45,7 +59,7 @@ namespace Filtration.ThemeEditor.Providers
             return themeViewModel;
         }
 
-        public IThemeEditorViewModel MasterThemeForScript(ItemFilterScript script)
+        public IThemeEditorViewModel MasterThemeForScript(IItemFilterScript script)
         {
             var themeViewModel = _themeViewModelFactory.Create();
             themeViewModel.InitialiseForMasterTheme(script);

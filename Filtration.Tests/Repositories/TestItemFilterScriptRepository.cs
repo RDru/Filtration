@@ -2,9 +2,11 @@
 using System.IO;
 using System.Threading.Tasks;
 using Filtration.ObjectModel;
+using Filtration.ObjectModel.Factories;
 using Filtration.Repositories;
 using Filtration.Services;
 using Filtration.ViewModels;
+using Filtration.ViewModels.Factories;
 using FluentAssertions;
 using Moq;
 using NUnit.Framework;
@@ -29,7 +31,8 @@ namespace Filtration.Tests.Repositories
             var mockItemFilterScriptViewModelFactory = new Mock<IItemFilterScriptViewModelFactory>();
             mockItemFilterScriptViewModelFactory.Setup(f => f.Create()).Returns(mockItemFilterScriptViewModel.Object);
 
-            var repository = new ItemFilterScriptRepository(mockPersistenceService.Object, mockItemFilterScriptViewModelFactory.Object);
+            var repository = CreateItemFilterScriptRepository(itemFilterPersistenceService: mockPersistenceService.Object,
+                                                              itemFilterScriptViewModelFactory: mockItemFilterScriptViewModelFactory.Object);
 
             // Act
             var result = await repository.LoadScriptFromFileAsync(testInputPath);
@@ -50,54 +53,14 @@ namespace Filtration.Tests.Repositories
 
             var mockItemFilterScriptViewModelFactory = new Mock<IItemFilterScriptViewModelFactory>();
 
-            var repository = new ItemFilterScriptRepository(mockPersistenceService.Object, mockItemFilterScriptViewModelFactory.Object);
+            var repository = CreateItemFilterScriptRepository(itemFilterPersistenceService: mockPersistenceService.Object,
+                                                              itemFilterScriptViewModelFactory: mockItemFilterScriptViewModelFactory.Object);
 
             // Act
             Func<Task<IItemFilterScriptViewModel>> result = async () => await repository.LoadScriptFromFileAsync(testInputPath);
 
             // Assert
-            result.ShouldThrow<IOException>();
-        }
-
-        [Test]
-        public void SetItemFilterScriptDirectory_CallsPersistenceServiceSetItemFilterScriptDirectory()
-        {
-            // Arrange
-            var testInputPath = "C:\\Test\\Path";
-
-            var mockPersistenceService = new Mock<IItemFilterPersistenceService>();
-            mockPersistenceService.Setup(p => p.SetItemFilterScriptDirectory(testInputPath)).Verifiable();
-
-            var mockItemFilterScriptViewModelFactory = new Mock<IItemFilterScriptViewModelFactory>();
-
-            var repository = new ItemFilterScriptRepository(mockPersistenceService.Object, mockItemFilterScriptViewModelFactory.Object);
-
-            // Act
-            repository.SetItemFilterScriptDirectory(testInputPath);
-
-            // Assert
-            mockPersistenceService.Verify();
-        }
-
-        [Test]
-        public void GetItemFilterScriptDirectory_ReturnsItemFilterScriptDirectoryFromPersistenceService()
-        {
-            // Arrange
-            var testInputPath = "C:\\Test\\Path";
-
-            var mockPersistenceService = new Mock<IItemFilterPersistenceService>();
-            mockPersistenceService.SetupGet(p => p.ItemFilterScriptDirectory).Returns(testInputPath).Verifiable();
-
-            var mockItemFilterScriptViewModelFactory = new Mock<IItemFilterScriptViewModelFactory>();
-
-            var repository = new ItemFilterScriptRepository(mockPersistenceService.Object, mockItemFilterScriptViewModelFactory.Object);
-
-            // Act
-            string result =  repository.GetItemFilterScriptDirectory();
-
-            // Assert
-            mockPersistenceService.Verify();
-            Assert.AreEqual(result, testInputPath);
+            result.Should().Throw<IOException>();
         }
 
         [Test]
@@ -111,13 +74,23 @@ namespace Filtration.Tests.Repositories
             var mockItemFilterScriptViewModelFactory = new Mock<IItemFilterScriptViewModelFactory>();
             mockItemFilterScriptViewModelFactory.Setup(f => f.Create()).Returns(mockItemFilterScriptViewModel.Object);
 
-            var repository = new ItemFilterScriptRepository(mockPersistenceService.Object, mockItemFilterScriptViewModelFactory.Object);
-            
+            var repository = CreateItemFilterScriptRepository(itemFilterPersistenceService: mockPersistenceService.Object,
+                                                              itemFilterScriptViewModelFactory: mockItemFilterScriptViewModelFactory.Object);
+
             // Act
             IItemFilterScriptViewModel result = repository.NewScript();
 
             // Assert
             Assert.AreEqual(mockItemFilterScriptViewModel.Object, result);
+        }
+
+        private ItemFilterScriptRepository CreateItemFilterScriptRepository(IItemFilterPersistenceService itemFilterPersistenceService = null,
+                                                                            IItemFilterScriptFactory itemFilterScriptFactory = null,
+                                                                            IItemFilterScriptViewModelFactory itemFilterScriptViewModelFactory = null)
+        {
+            return new ItemFilterScriptRepository(itemFilterPersistenceService ?? new Mock<IItemFilterPersistenceService>().Object,
+                                                  itemFilterScriptFactory ?? new Mock<IItemFilterScriptFactory>().Object,
+                                                  itemFilterScriptViewModelFactory ?? new Mock<IItemFilterScriptViewModelFactory>().Object);
         }
     }
 }

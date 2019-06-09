@@ -1,25 +1,21 @@
-﻿using System.Collections.ObjectModel;
-using System.Linq;
+﻿using System.Linq;
 using System.Windows.Media;
-using Filtration.Common.ViewModels;
 using Filtration.ObjectModel;
 using Filtration.ObjectModel.BlockItemTypes;
-using Filtration.Views;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
-using Xceed.Wpf.Toolkit;
 
 namespace Filtration.ViewModels
 {
     internal interface IReplaceColorsViewModel
     {
-        void Initialise(ItemFilterScript itemFilterScript, IItemFilterBlock initialiseFromBlock);
-        void Initialise(ItemFilterScript itemFilterScript);
+        void Initialise(IItemFilterScript itemFilterScript, IItemFilterBlock initialiseFromBlock);
+        void Initialise(IItemFilterScript itemFilterScript);
     }
 
     internal class ReplaceColorsViewModel : ViewModelBase, IReplaceColorsViewModel
     {
-        private ItemFilterScript _itemFilterScript;
+        private IItemFilterScript _itemFilterScript;
         private ReplaceColorsParameterSet _replaceColorsParameterSet;
 
         public ReplaceColorsViewModel()
@@ -29,7 +25,7 @@ namespace Filtration.ViewModels
 
         public RelayCommand ReplaceColorsCommand { get; private set; }
 
-        public void Initialise(ItemFilterScript itemFilterScript, IItemFilterBlock initialiseFromBlock)
+        public void Initialise(IItemFilterScript itemFilterScript, IItemFilterBlock initialiseFromBlock)
         {
             _replaceColorsParameterSet = new ReplaceColorsParameterSet();
 
@@ -63,11 +59,9 @@ namespace Filtration.ViewModels
             _itemFilterScript = itemFilterScript;
         }
 
-        public ObservableCollection<ColorItem> AvailableColors => PathOfExileColors.DefaultColors;
-
         public Color NewTextColor
         {
-            get { return _replaceColorsParameterSet.NewTextColor; }
+            get => _replaceColorsParameterSet.NewTextColor;
             set
             {
                 _replaceColorsParameterSet.NewTextColor = value;
@@ -78,11 +72,11 @@ namespace Filtration.ViewModels
 
         public Color DisplayTextColor => _replaceColorsParameterSet.ReplaceTextColor
             ? _replaceColorsParameterSet.NewTextColor
-            : new Color {A = 255, R = 255, G = 255, B = 255};
+            : new Color {A = 240, R = 255, G = 255, B = 255};
 
         public bool ReplaceTextColor
         {
-            get { return _replaceColorsParameterSet.ReplaceTextColor; }
+            get => _replaceColorsParameterSet.ReplaceTextColor;
             set
             {
                 _replaceColorsParameterSet.ReplaceTextColor = value;
@@ -92,7 +86,7 @@ namespace Filtration.ViewModels
 
         public Color NewBackgroundColor
         {
-            get { return _replaceColorsParameterSet.NewBackgroundColor; }
+            get => _replaceColorsParameterSet.NewBackgroundColor;
             set
             {
                 _replaceColorsParameterSet.NewBackgroundColor = value;
@@ -103,11 +97,11 @@ namespace Filtration.ViewModels
 
         public Color DisplayBackgroundColor => _replaceColorsParameterSet.ReplaceBackgroundColor
             ? _replaceColorsParameterSet.NewBackgroundColor
-            : new Color { A = 255, R = 0, G = 0, B = 0 };
+            : new Color { A = 240, R = 0, G = 0, B = 0 };
 
         public bool ReplaceBackgroundColor
         {
-            get { return _replaceColorsParameterSet.ReplaceBackgroundColor; }
+            get => _replaceColorsParameterSet.ReplaceBackgroundColor;
             set
             {
                 _replaceColorsParameterSet.ReplaceBackgroundColor = value;
@@ -117,7 +111,7 @@ namespace Filtration.ViewModels
 
         public Color NewBorderColor
         {
-            get { return _replaceColorsParameterSet.NewBorderColor; }
+            get => _replaceColorsParameterSet.NewBorderColor;
             set
             {
                 _replaceColorsParameterSet.NewBorderColor = value;
@@ -128,11 +122,11 @@ namespace Filtration.ViewModels
 
         public Color DisplayBorderColor => _replaceColorsParameterSet.ReplaceBorderColor
             ? _replaceColorsParameterSet.NewBorderColor
-            : new Color { A = 255, R = 0, G = 0, B = 0 };
+            : new Color { A = 240, R = 0, G = 0, B = 0 };
 
         public bool ReplaceBorderColor
         {
-            get { return _replaceColorsParameterSet.ReplaceBorderColor; }
+            get => _replaceColorsParameterSet.ReplaceBorderColor;
             set
             {
                 _replaceColorsParameterSet.ReplaceBorderColor = value;
@@ -142,7 +136,7 @@ namespace Filtration.ViewModels
 
         public ReplaceColorsParameterSet ReplaceColorsParameterSet => _replaceColorsParameterSet;
 
-        public void Initialise(ItemFilterScript itemFilterScript)
+        public void Initialise(IItemFilterScript itemFilterScript)
         {
             _replaceColorsParameterSet = new ReplaceColorsParameterSet();
             _itemFilterScript = itemFilterScript;

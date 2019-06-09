@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Media.Imaging;
-using Filtration.Utilities;
 using GalaSoft.MvvmLight.Command;
 using GalaSoft.MvvmLight.Messaging;
 
@@ -15,14 +15,15 @@ namespace Filtration.ViewModels.ToolPanes
 
     internal class BlockGroupBrowserViewModel : ToolViewModel, IBlockGroupBrowserViewModel
     {
-        private readonly IBlockGroupMapper _blockGroupMapper;
         private ObservableCollection<ItemFilterBlockGroupViewModel> _blockGroupViewModelViewModels;
         private ItemFilterBlockGroupViewModel _selectedBlockGroupViewModel;
 
-        public BlockGroupBrowserViewModel(IBlockGroupMapper blockGroupMapper) : base("Block Group Browser")
+        public BlockGroupBrowserViewModel() : base("Block Group Browser")
         {
-            _blockGroupMapper = blockGroupMapper;
             FilterToSelectedBlockGroupCommand = new RelayCommand(OnFilterToSelectedBlockGroupCommand, () => SelectedBlockGroupViewModel != null);
+            ClearAllFiltersCommand = new RelayCommand(OnClearAllFiltersCommand);
+            ExpandAllCommand = new RelayCommand(OnExpandAllCommand);
+            CollapseAllCommand = new RelayCommand(OnCollapseAllCommand);
 
             ContentId = ToolContentId;
             var icon = new BitmapImage();
@@ -30,6 +31,7 @@ namespace Filtration.ViewModels.ToolPanes
             icon.UriSource = new Uri("pack://application:,,,/Filtration;component/Resources/Icons/block_group_browser_icon.png");
             icon.EndInit();
             IconSource = icon;
+
             Messenger.Default.Register<NotificationMessage<bool>>(this, message =>
             {
                 switch (message.Notification)
@@ -37,6 +39,11 @@ namespace Filtration.ViewModels.ToolPanes
                     case "ShowAdvancedToggled":
                     {
                         OnShowAdvancedToggled(message.Content);
+                        break;
+                    }
+                    case "BlockGroupsChanged":
+                    {
+                        BlockGroupViewModels = RebuildBlockGroupViewModels(message.Content);
                         break;
                     }
                 }
@@ -60,7 +67,7 @@ namespace Filtration.ViewModels.ToolPanes
 
         public ItemFilterBlockGroupViewModel SelectedBlockGroupViewModel
         {
-            get { return _selectedBlockGroupViewModel; }
+            get => _selectedBlockGroupViewModel;
             set
             {
                 _selectedBlockGroupViewModel = value;
@@ -70,10 +77,16 @@ namespace Filtration.ViewModels.ToolPanes
         }
 
         public RelayCommand FilterToSelectedBlockGroupCommand { get; }
-        
+
+        public RelayCommand ClearAllFiltersCommand { get; }
+
+        public RelayCommand ExpandAllCommand { get; }
+
+        public RelayCommand CollapseAllCommand { get; }
+
         public ObservableCollection<ItemFilterBlockGroupViewModel> BlockGroupViewModels
         {
-            get { return _blockGroupViewModelViewModels; }
+            get => _blockGroupViewModelViewModels;
             private set
             {
                 _blockGroupViewModelViewModels = value;
@@ -94,15 +107,46 @@ namespace Filtration.ViewModels.ToolPanes
 
         private ObservableCollection<ItemFilterBlockGroupViewModel> RebuildBlockGroupViewModels(bool showAdvanced)
         {
-            return
-                _blockGroupMapper.MapBlockGroupsToViewModels(
-                    AvalonDockWorkspaceViewModel.ActiveScriptViewModel.Script.ItemFilterBlockGroups, showAdvanced);
+            if (BlockGroupViewModels != null)
+            {
+                foreach (var viewModel in BlockGroupViewModels)
+                {
+                    viewModel.ClearStatusChangeSubscriptions();
+                }
+            }
+
+            // This assumes that there will only ever be a single root node.
+            return new ObservableCollection<ItemFilterBlockGroupViewModel>
+            (
+                new ItemFilterBlockGroupViewModel(AvalonDockWorkspaceViewModel.ActiveScriptViewModel.Script.ItemFilterBlockGroups.First(), showAdvanced, null).VisibleChildGroups
+            );
         }
 
         private void OnFilterToSelectedBlockGroupCommand()
         {
             AvalonDockWorkspaceViewModel.ActiveScriptViewModel.BlockFilterPredicate =
                 b => b.Block.HasBlockGroupInParentHierarchy(SelectedBlockGroupViewModel.SourceBlockGroup, b.Block.BlockGroup);
+        }
+
+        private void OnClearAllFiltersCommand()
+        {
+            AvalonDockWorkspaceViewModel.ActiveScriptViewModel?.ClearFilterCommand.Execute(null);
+        }
+
+        private void OnExpandAllCommand()
+        {
+            foreach (var vm in BlockGroupViewModels)
+            {
+                vm.SetIsExpandedForAll(true);
+            }
+        }
+
+        private void OnCollapseAllCommand()
+        {
+            foreach (var vm in BlockGroupViewModels)
+            {
+                vm.SetIsExpandedForAll(false);
+            }
         }
     }
 }

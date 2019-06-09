@@ -1,12 +1,11 @@
 ﻿using System.ComponentModel;
 using System.Windows.Media;
+using Filtration.ObjectModel.Enums;
 
 namespace Filtration.ObjectModel
 {
     public interface IItemFilterBlockItem : INotifyPropertyChanged
     {
-        event PropertyChangedEventHandler PropertyChanged;
-
         string PrefixText { get; }
         string OutputText { get; }
         string DisplayHeading { get; }
@@ -14,7 +13,8 @@ namespace Filtration.ObjectModel
         Color SummaryBackgroundColor { get; }
         Color SummaryTextColor { get; }
         int MaximumAllowed { get; }
-        int SortOrder { get; }
+        BlockItemOrdering SortOrder { get; }
         bool IsDirty { get; }
+        string Comment { get; set; }
     }
 }
